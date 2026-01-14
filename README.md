@@ -8,7 +8,7 @@ It communicates with a deployed backend API and demonstrates authentication, pro
 🔗 Live Project Links
 
 Frontend (Netlify):
-https://69664413f78f15e44dd477a9--glowing-flan-20b600.netlify.app
+https://glowing-flan-20b600.netlify.app
 
 Backend (Render):
 https://gigflow-backend-p324.onrender.com
