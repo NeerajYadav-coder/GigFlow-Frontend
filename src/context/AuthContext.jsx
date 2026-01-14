@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  /* 🔁 Restore login from cookie */
+  /*  Restore login from cookie */
   useEffect(() => {
     const fetchUser = async () => {
       try {

@@ -1,47 +1,3 @@
-// import { Link } from "react-router-dom";
-// import { useContext } from "react";
-// import { AuthContext } from "../context/AuthContext";
-
-// const Navbar = () => {
-//   const { user, logout } = useContext(AuthContext);
-
-//   return (
-//     <div style={{ padding: 15, background: "#222", color: "#fff" }}>
-//       <Link to="/" style={{ color: "#fff", marginRight: 10 }}>
-//         Home
-//       </Link>
-
-//       {user ? (
-//         <>
-//           {/* ONLY CLIENT CAN CREATE GIG */}
-//           {user.role === "client" && (
-//             <Link to="/create" style={{ color: "#fff", marginRight: 10 }}>
-//               Create Gig
-//             </Link>
-//           )}
-
-//           <button onClick={logout}>Logout</button>
-//         </>
-//       ) : (
-//         <>
-//           <Link to="/login" style={{ color: "#fff", marginRight: 10 }}>
-//             Login
-//           </Link>
-//           <Link to="/register" style={{ color: "#fff" }}>
-//             Register
-//           </Link>
-//         </>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Navbar;
-
-
-
-
-
 import { Link } from "react-router-dom";
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -55,7 +11,7 @@ const Navbar = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between items-center">
 
-          {/* Logo / Brand */}
+         
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
               <span className="text-indigo-600 text-2xl">G</span>
@@ -113,7 +69,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile hamburger */}
+          
           <div className="md:hidden">
             <button
               type="button"
@@ -136,7 +92,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile menu dropdown */}
+      
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white">
           <div className="px-2 pt-2 pb-3 space-y-1">

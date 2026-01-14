@@ -1,37 +1,3 @@
-// import { useState } from "react";
-// import api from "../api/axios";
-// import { useNavigate } from "react-router-dom";
-
-// const CreateGig = () => {
-//   const [form, setForm] = useState({ title: "", description: "", budget: "" });
-//   const navigate = useNavigate();
-
-//   const submit = async (e) => {
-//     e.preventDefault();
-//     await api.post("/gigs", form);
-//     navigate("/");
-//   };
-
-//   return (
-//     <form onSubmit={submit} style={{ padding: 20 }}>
-//       <h2>Create Gig</h2>
-
-//       <input placeholder="Title" onChange={e => setForm({ ...form, title: e.target.value })} /><br /><br />
-//       <textarea placeholder="Description" onChange={e => setForm({ ...form, description: e.target.value })} /><br /><br />
-//       <input placeholder="Budget" onChange={e => setForm({ ...form, budget: e.target.value })} /><br /><br />
-
-//       <button>Create</button>
-//     </form>
-//   );
-// };
-
-// export default CreateGig;
-
-
-
-
-
-
 import { useState } from "react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
