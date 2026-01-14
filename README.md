@@ -144,7 +144,7 @@ Protected routes
 
 Bidding workflow
 
-(Video link will be shared via email submission)
+Video link - https://www.loom.com/share/3bed382ae7db47b89d960e7fc6e6bae7
 
 📌 Notes
 
