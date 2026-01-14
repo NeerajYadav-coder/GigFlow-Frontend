@@ -1,6 +1,6 @@
 GigFlow – Frontend
 
-GigFlow is a mini freelance marketplace platform built as part of the ServiceHive Full Stack Development Internship Assignment.
+GigFlow is a mini freelance marketplace platform.
 
 This repository contains the frontend application, developed using React.js.
 It communicates with a deployed backend API and demonstrates authentication, protected routes, and role-based user flows.
