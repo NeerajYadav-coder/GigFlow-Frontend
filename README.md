@@ -1,16 +1,161 @@
-# React + Vite
+GigFlow – Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+GigFlow is a mini freelance marketplace platform built as part of the ServiceHive Full Stack Development Internship Assignment.
 
-Currently, two official plugins are available:
+This repository contains the frontend application, developed using React.js.
+It communicates with a deployed backend API and demonstrates authentication, protected routes, and role-based user flows.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+🔗 Live Project Links
 
-## React Compiler
+Frontend (Netlify):
+https://69664413f78f15e44dd477a9--glowing-flan-20b600.netlify.app
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Backend (Render):
+https://gigflow-backend-p324.onrender.com
 
-## Expanding the ESLint configuration
+🧠 Project Overview
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+GigFlow allows users to:
+
+Register and log in as users
+
+Browse available gigs
+
+View gig details
+
+Place bids on gigs (authenticated users)
+
+Maintain login state using cookies and context
+
+The frontend is built with scalability and clean state management in mind.
+
+🛠 Tech Stack
+
+React.js (Vite)
+
+Axios
+
+React Context API
+
+React Router DOM
+
+CSS / Tailwind (if applicable)
+
+📁 Folder Structure
+src/
+├── components/
+│   ├── Navbar.jsx
+│   ├── ProtectedRoute.jsx
+│
+├── context/
+│   ├── AuthContext.jsx
+│
+├── pages/
+│   ├── Home.jsx
+│   ├── Register.jsx
+│   ├── Login.jsx
+│   ├── GigDetails.jsx
+│
+├── services/
+│   ├── api.js
+│
+├── App.jsx
+├── main.jsx
+
+🔐 Authentication Flow
+
+Authentication is handled using HTTP-only cookies
+
+User session is restored on page refresh using /api/auth/me
+
+Global auth state is managed using React Context API
+
+Protected routes prevent unauthorized access
+
+🌐 API Integration
+
+The frontend communicates with the backend using Axios.
+
+Example base configuration:
+
+axios.defaults.baseURL = "https://gigflow-backend-p324.onrender.com";
+axios.defaults.withCredentials = true;
+
+
+All protected requests automatically include cookies for authentication.
+
+⚙️ Setup Instructions (Local Development)
+1️⃣ Clone the Repository
+git clone <frontend-repo-url>
+cd frontend
+
+2️⃣ Install Dependencies
+npm install
+
+3️⃣ Run the Development Server
+npm run dev
+
+
+The application will run at:
+
+http://localhost:5173
+
+🔧 Environment Variables
+
+Create a .env file in the root directory.
+
+Example:
+
+VITE_API_URL=https://gigflow-backend-p324.onrender.com
+
+
+⚠️ Do not commit .env files.
+Always use .env.example for reference.
+
+✨ Key Features Implemented
+
+User Registration & Login
+
+Persistent Authentication (Cookies)
+
+Protected Routes
+
+Gig Listing Page
+
+Gig Details Page
+
+Bid Placement (Authenticated)
+
+Centralized API handling
+
+Clean and modular structure
+
+🎥 Demo Video
+
+A 2-minute Loom / screen recording demonstrates:
+
+User registration
+
+Login & authentication
+
+Browsing gigs
+
+Protected routes
+
+Bidding workflow
+
+(Video link will be shared via email submission)
+
+📌 Notes
+
+Backend is deployed on Render
+
+Frontend is deployed on Netlify
+
+CORS and cookie-based authentication are fully configured
+
+Designed following production-ready best practices
+
+📄 License
+
+This project is developed solely for the ServiceHive Internship Assignment and is intended for evaluation purposes only.
