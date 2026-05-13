@@ -36,6 +36,7 @@ const Home = () => {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
 
+
   // Fetch available gigs with filters
   useEffect(() => {
     const fetchGigs = async () => {
@@ -57,6 +58,8 @@ const Home = () => {
     };
     fetchGigs();
   }, [search, category, page]);
+
+
 
   // Fetch client's own gigs
   useEffect(() => {
@@ -151,11 +154,13 @@ const Home = () => {
           <h2 className="text-xl font-bold text-[#f0f0fa] mb-5">Other Open Gigs</h2>
         )}
 
+
+
         {/* FREELANCER: Section header */}
         {user.role === "freelancer" && (
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-bold text-[#f0f0fa]">Available Gigs</h2>
+              <h2 className="text-xl font-bold text-[#f0f0fa]">Browse All Gigs</h2>
               <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
                 {total} open {total === 1 ? "gig" : "gigs"} available
               </p>
@@ -282,7 +287,7 @@ const Home = () => {
 };
 
 // ----- GIG CARD -----
-function GigCard({ gig, isOwner }) {
+function GigCard({ gig, isOwner, showMatch }) {
   const daysLeft = gig.deadline
     ? Math.ceil((new Date(gig.deadline) - new Date()) / (1000 * 60 * 60 * 24))
     : null;
@@ -301,7 +306,15 @@ function GigCard({ gig, isOwner }) {
         <span className="badge badge-purple text-xs shrink-0">
           {CATEGORY_ICONS[gig.category] || "⚙️"} {gig.category || "Other"}
         </span>
-        {statusBadge()}
+        <div className="flex items-center gap-2">
+          {showMatch && gig.matchScore && (
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+              style={{ background: "rgba(16,185,129,0.1)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)" }}>
+              {gig.matchScore}% Match
+            </div>
+          )}
+          {statusBadge()}
+        </div>
       </div>
 
       {/* Title */}
@@ -309,6 +322,15 @@ function GigCard({ gig, isOwner }) {
         <h3 className="font-semibold text-[#f0f0fa] line-clamp-2 text-base leading-snug group-hover:text-violet-300 transition-colors">
           {gig.title}
         </h3>
+        {showMatch && gig.matchReasons && gig.matchReasons.length > 0 && (
+          <div className="mt-1.5 flex flex-col gap-0.5">
+            {gig.matchReasons.map((reason, idx) => (
+              <p key={idx} className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                <span className="w-1 h-1 rounded-full bg-emerald-400" /> {reason}
+              </p>
+            ))}
+          </div>
+        )}
         <p className="text-xs mt-1.5 line-clamp-2 leading-relaxed" style={{ color: "var(--text-muted)" }}>
           {gig.description}
         </p>
@@ -456,11 +478,7 @@ function LandingPage() {
 
         <div className="section-container relative">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-8"
-              style={{ background: "rgba(139,92,246,0.1)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.25)" }}>
-              <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse inline-block" />
-              Final Year Project — Freelance Marketplace Platform
-            </div>
+
 
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight mb-6 leading-tight">
               <span className="text-[#f0f0fa]">The Smarter Way</span>
@@ -571,7 +589,7 @@ function LandingPage() {
       {/* Footer */}
       <footer className="py-8 border-t text-center" style={{ borderColor: "var(--border)" }}>
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-          © 2024 GigFlow — Final Year Project. Built with React, Node.js & MongoDB.
+          © {new Date().getFullYear()} GigFlow. All rights reserved.
         </p>
       </footer>
     </div>

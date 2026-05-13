@@ -14,8 +14,8 @@ const Navbar = () => {
     <Link
       to={path}
       className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${isActive(path)
-          ? "bg-violet-500/15 text-violet-400"
-          : "text-[#8888aa] hover:text-[#f0f0fa] hover:bg-white/5"
+        ? "bg-violet-500/15 text-violet-400"
+        : "text-[#8888aa] hover:text-[#f0f0fa] hover:bg-white/5"
         }`}
     >
       {label}
@@ -43,7 +43,7 @@ const Navbar = () => {
 
           {/* Desktop menu */}
           <div className="hidden md:flex items-center gap-1">
-            {!user && navLink("/", "Browse Gigs")}
+
 
             {user?.role === "client" && (
               <>
@@ -66,7 +66,7 @@ const Navbar = () => {
                   Log in
                 </Link>
                 <Link to="/register" className="btn-primary text-sm py-2">
-                  Sign up free
+                  Sign up
                 </Link>
               </div>
             ) : (
@@ -212,7 +212,7 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <MobileLink to="/" label="Browse Gigs" onClick={() => setMobileOpen(false)} />
+
                 <MobileLink to="/login" label="Log in" onClick={() => setMobileOpen(false)} />
                 <Link
                   to="/register"
