@@ -1,116 +1,221 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+
+const CATEGORIES = [
+  "Web Development", "Mobile Development", "UI/UX Design",
+  "Graphic Design", "Content Writing", "Digital Marketing",
+  "Video & Animation", "Data Science & AI", "DevOps & Cloud",
+  "Cybersecurity", "Database", "Other"
+];
 
 const CreateGig = () => {
+  const { user } = useContext(AuthContext);
   const [form, setForm] = useState({
     title: "",
     description: "",
     budget: "",
+    category: "Web Development",
+    deadline: "",
+    tags: "",
+    skillsRequired: "",
   });
-
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const submit = async (e) => {
     e.preventDefault();
-    await api.post("/gigs", {
-      ...form,
-      budget: Number(form.budget), // ensure number is sent
-    });
-    navigate("/");
+    setLoading(true);
+    try {
+      const payload = {
+        title: form.title,
+        description: form.description,
+        budget: Number(form.budget),
+        category: form.category,
+        deadline: form.deadline || null,
+        tags: form.tags ? form.tags.split(",").map(t => t.trim()).filter(Boolean) : [],
+        skillsRequired: form.skillsRequired
+          ? form.skillsRequired.split(",").map(s => s.trim()).filter(Boolean)
+          : [],
+      };
+
+      await api.post("/gigs", payload);
+      toast.success("Gig posted successfully! 🎉");
+      navigate("/");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to post gig");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const get = (key) => form[key];
+  const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+
+  const minDeadline = new Date();
+  minDeadline.setDate(minDeadline.getDate() + 1);
+  const minDateStr = minDeadline.toISOString().split("T")[0];
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-gray-900">Post a New Gig</h1>
-          <p className="mt-3 text-lg text-gray-600">
-            Describe your project and attract the best freelancers
-          </p>
-        </div>
+    <div className="min-h-screen pb-16" style={{ background: "var(--bg-primary)" }}>
+      <div className="section-container py-8">
+        <div className="max-w-3xl mx-auto">
 
-        {/* Form Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <form onSubmit={submit} className="p-6 sm:p-8 lg:p-10 space-y-8">
-            {/* Title */}
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Gig Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="title"
-                type="text"
-                required
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="e.g. Build a responsive landing page in React"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-colors"
-              />
-            </div>
+          {/* Header */}
+          <div className="mb-8">
+            <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm mb-4 transition-colors"
+              style={{ color: "var(--text-secondary)" }}
+              onMouseEnter={e => e.target.style.color = "#f0f0fa"}
+              onMouseLeave={e => e.target.style.color = "var(--text-secondary)"}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#f0f0fa]">Post a New Gig</h1>
+            <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+              Describe your project clearly to attract the best talent
+            </p>
+          </div>
 
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="description"
-                rows={8}
-                required
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Provide detailed requirements, tech stack preferences, timeline expectations, deliverables, etc."
-                className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm resize-none transition-colors"
-              />
-              <p className="mt-2 text-sm text-gray-500">
-                The more details you provide, the better proposals you'll receive.
-              </p>
-            </div>
+          <div className="card-dark p-6 sm:p-8">
+            <form onSubmit={submit} className="space-y-7">
 
-            {/* Budget */}
-            <div>
-              <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-2">
-                Budget (₹ INR) <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="text-gray-500 sm:text-sm">₹</span>
-                </div>
+              {/* Title */}
+              <div>
+                <label className="form-label">Gig Title <span className="text-red-400">*</span></label>
                 <input
-                  id="budget"
-                  type="number"
-                  min="1"
+                  type="text"
                   required
-                  value={form.budget}
-                  onChange={(e) => setForm({ ...form, budget: e.target.value })}
-                  placeholder="25000"
-                  className="block w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-colors"
+                  value={get("title")}
+                  onChange={set("title")}
+                  placeholder="e.g. Build a responsive React landing page"
+                  className="input-dark"
+                />
+                <p className="text-xs mt-1.5" style={{ color: "var(--text-muted)" }}>
+                  Be specific and clear to get better proposals
+                </p>
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="form-label">Category <span className="text-red-400">*</span></label>
+                <select
+                  value={get("category")}
+                  onChange={set("category")}
+                  className="input-dark"
+                  style={{ appearance: "none", cursor: "pointer" }}
+                >
+                  {CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="form-label">Full Description <span className="text-red-400">*</span></label>
+                <textarea
+                  rows={6}
+                  required
+                  value={get("description")}
+                  onChange={set("description")}
+                  placeholder="Provide detailed requirements: tech stack preferences, timeline expectations, specific features, deliverables, etc."
+                  className="input-dark resize-none"
+                />
+                <p className="text-xs mt-1.5" style={{ color: "var(--text-muted)" }}>
+                  The more details you provide, the better bids you'll receive.
+                </p>
+              </div>
+
+              {/* Skills Required */}
+              <div>
+                <label className="form-label">Skills Required</label>
+                <input
+                  type="text"
+                  value={get("skillsRequired")}
+                  onChange={set("skillsRequired")}
+                  placeholder="React, Node.js, MongoDB, Tailwind CSS (comma separated)"
+                  className="input-dark"
+                />
+                <p className="text-xs mt-1.5" style={{ color: "var(--text-muted)" }}>
+                  List key skills to attract the right freelancers
+                </p>
+              </div>
+
+              {/* Budget + Deadline */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="form-label">Budget (₹ INR) <span className="text-red-400">*</span></label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium" style={{ color: "var(--text-muted)" }}>₹</span>
+                    <input
+                      type="number"
+                      min="100"
+                      required
+                      value={get("budget")}
+                      onChange={set("budget")}
+                      placeholder="25000"
+                      className="input-dark pl-7"
+                    />
+                  </div>
+                  <p className="text-xs mt-1.5" style={{ color: "var(--text-muted)" }}>Total fixed-price budget</p>
+                </div>
+
+                <div>
+                  <label className="form-label">Deadline (Optional)</label>
+                  <input
+                    type="date"
+                    min={minDateStr}
+                    value={get("deadline")}
+                    onChange={set("deadline")}
+                    className="input-dark"
+                    style={{ colorScheme: "dark" }}
+                  />
+                  <p className="text-xs mt-1.5" style={{ color: "var(--text-muted)" }}>When do you need this done?</p>
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="form-label">Tags (Optional)</label>
+                <input
+                  type="text"
+                  value={get("tags")}
+                  onChange={set("tags")}
+                  placeholder="landing-page, e-commerce, dashboard (comma separated)"
+                  className="input-dark"
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500">
-                This is your total project budget (fixed price).
-              </p>
-            </div>
 
-            {/* Submit Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
-              <button
-                type="submit"
-                className="w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-              >
-                Publish Gig
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="w-full sm:w-auto px-8 py-3 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 font-medium rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+              {/* Actions */}
+              <div className="flex gap-4 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-primary py-3 flex-1 sm:flex-none sm:px-10 disabled:opacity-60"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2 justify-center">
+                      <div className="spinner w-4 h-4" />
+                      Publishing...
+                    </span>
+                  ) : "🚀 Publish Gig"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="btn-secondary py-3 px-6"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
