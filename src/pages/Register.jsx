@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
+import { User, Mail, Lock, Eye, EyeOff, Briefcase, Code, ArrowLeft, ArrowRight } from "lucide-react";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
@@ -66,74 +67,81 @@ const Register = () => {
   const ROLES = [
     {
       value: "client",
-      icon: "📋",
-      title: "I'm a Client",
-      desc: "I want to post gigs and hire freelancers"
+      icon: <Briefcase className="w-6 h-6 text-indigo-650" />,
+      title: "Hire Talent",
+      desc: "Post gigs, review bids, and manage deliverables."
     },
     {
       value: "freelancer",
-      icon: "💻",
-      title: "I'm a Freelancer",
-      desc: "I want to find projects and earn money"
+      icon: <Code className="w-6 h-6 text-cyan-600" />,
+      title: "Find Work",
+      desc: "Apply to projects, place bids, and earn money."
     }
   ];
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative" style={{ background: "var(--bg-primary)" }}>
+    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden" style={{ background: "var(--bg-secondary)" }}>
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/3 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-10"
-          style={{ background: "radial-gradient(circle, #c084fc, transparent)" }} />
+        <div className="absolute top-1/3 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-30"
+          style={{ background: "radial-gradient(circle, var(--accent-light), transparent)" }} />
       </div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-lg relative">
-        <Link to="/" className="flex items-center justify-center gap-2 font-bold text-2xl tracking-tight mb-8">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black"
-            style={{ background: "linear-gradient(135deg, #7c3aed, #c084fc)" }}>
-            G
-          </div>
-          <span className="gradient-text text-xl">igFlow</span>
+      <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10 px-4 sm:px-0">
+        
+        {/* Back Link */}
+        <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors mb-6">
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to landing page
         </Link>
 
-        <div className="rounded-3xl border p-8 shadow-2xl"
-          style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+        {/* Logo */}
+        <Link to="/" className="flex items-center justify-center gap-2.5 font-bold text-2xl tracking-tight mb-8 group">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black shadow-md transition-transform duration-300 group-hover:scale-105"
+            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-secondary))" }}>
+            <Briefcase className="w-5 h-5 text-white" />
+          </div>
+          <span className="gradient-text text-2xl font-black tracking-tight">GigFlow</span>
+        </Link>
+
+        {/* Form Box */}
+        <div className="rounded-3xl border p-6 sm:p-10 shadow-xl relative bg-white"
+          style={{ borderColor: "var(--border)" }}>
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-655 to-sky-500" />
+
           <div className="mb-8">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="badge badge-purple px-3 py-1 text-[10px] uppercase tracking-wider">
-                Signing up as {form.role}
-              </span>
-            </div>
-            <h2 className="text-2xl font-bold text-[#f0f0fa]">Create your account</h2>
-            <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-              Join GigFlow and start your journey today
+            <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Create Your Account</h2>
+            <p className="mt-2 text-xs font-semibold text-slate-500">
+              Join GigFlow and discover professional work opportunities.
             </p>
           </div>
 
           <form className="space-y-5" onSubmit={submit}>
+            
             {/* Role selector */}
             <div>
               <label className="form-label">I want to</label>
-              <div className="grid grid-cols-2 gap-3 mt-1">
+              <div className="grid grid-cols-2 gap-3 mt-1.5">
                 {ROLES.map(r => (
                   <button
                     key={r.value}
                     type="button"
                     onClick={() => setForm({ ...form, role: r.value })}
-                    className={`p-4 rounded-xl border text-left transition-all duration-200 ${form.role === r.value
-                      ? "border-violet-500/60"
-                      : "hover:border-violet-500/30"
-                      }`}
+                    className="p-4.5 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col items-start gap-2 relative overflow-hidden bg-white shadow-sm"
                     style={{
-                      background: form.role === r.value
-                        ? "rgba(139,92,246,0.12)"
-                        : "var(--bg-secondary)",
                       borderColor: form.role === r.value
-                        ? "rgba(139,92,246,0.6)"
+                        ? "rgba(79, 70, 229, 0.4)"
                         : "var(--border)"
                     }}
                   >
-                    <div className="text-2xl mb-1.5">{r.icon}</div>
-                    <div className="text-sm font-semibold text-[#f0f0fa]">{r.title}</div>
-                    <div className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{r.desc}</div>
+                    {form.role === r.value && (
+                      <div className="absolute top-0 right-0 w-8 h-8 bg-indigo-50/70 rounded-bl-2xl flex items-center justify-center border-l border-b border-indigo-100">
+                        <div className="w-2 h-2 rounded-full bg-indigo-600" />
+                      </div>
+                    )}
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                      {r.icon}
+                    </div>
+                    <div className="text-xs font-extrabold text-slate-800 mt-1">{r.title}</div>
+                    <div className="text-[10px] leading-tight font-semibold text-slate-450">{r.desc}</div>
                   </button>
                 ))}
               </div>
@@ -142,37 +150,50 @@ const Register = () => {
             {/* Name */}
             <div>
               <label className="form-label">Full Name</label>
-              <input
-                id="name"
-                type="text"
-                autoComplete="name"
-                required
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="John Doe"
-                className="input-dark"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                  <User className="w-4 h-4" />
+                </div>
+                <input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="e.g. John Doe"
+                  className="input-dark pl-11 bg-white"
+                />
+              </div>
             </div>
 
             {/* Email */}
             <div>
-              <label className="form-label">Email address</label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="you@example.com"
-                className="input-dark"
-              />
+              <label className="form-label">Email Address</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="name@domain.com"
+                  className="input-dark pl-11 bg-white"
+                />
+              </div>
             </div>
 
             {/* Password */}
             <div>
               <label className="form-label">Password</label>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-4 h-4" />
+                </div>
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -181,48 +202,42 @@ const Register = () => {
                   minLength={6}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  placeholder="Min. 6 characters"
-                  className="input-dark pr-12"
+                  placeholder="At least 6 characters"
+                  className="input-dark pl-11 pr-12 bg-white"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#55556a] hover:text-[#8888aa] transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-650 transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d={showPassword
-                        ? "M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                        : "M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      }
-                    />
-                  </svg>
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {form.password.length > 0 && form.password.length < 6 && (
-                <p className="text-xs mt-1 text-red-400">Password must be at least 6 characters</p>
-              )}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-3 text-base disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+              className="btn-primary w-full py-3.5 text-sm font-bold disabled:opacity-60 disabled:cursor-not-allowed mt-4 flex items-center justify-center gap-2"
             >
               {loading ? (
-                <span className="flex items-center gap-2 justify-center">
+                <>
                   <div className="spinner w-4 h-4" />
                   Creating account...
-                </span>
-              ) : "Create Account →"}
+                </>
+              ) : (
+                <>
+                  Create Account <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          <div className="mt-8 text-center pt-6 border-t border-slate-100" style={{ borderColor: "var(--border)" }}>
+            <p className="text-xs font-semibold text-slate-500">
               Already have an account?{" "}
-              <Link to="/login" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
-                Sign in
+              <Link to="/login" className="text-indigo-600 hover:text-indigo-750 font-bold transition-colors underline decoration-indigo-500/20">
+                Sign In
               </Link>
             </p>
           </div>

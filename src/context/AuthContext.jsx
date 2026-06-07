@@ -4,6 +4,18 @@ import { useToast } from "./ToastContext";
 
 export const AuthContext = createContext();
 
+// Ensure user always has both .id and ._id, and is a plain JS object
+const normalizeUser = (u) => {
+  if (!u) return null;
+  // Mongoose docs have toObject(); plain API responses are already POJOs
+  const plain = u.toObject ? u.toObject() : { ...u };
+  return {
+    ...plain,
+    id: plain.id || plain._id?.toString(),
+    _id: plain._id || plain.id
+  };
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +26,7 @@ export const AuthProvider = ({ children }) => {
     const fetchUser = async () => {
       try {
         const res = await api.get("/auth/me");
-        setUser(res.data.user);
+        setUser(normalizeUser(res.data.user));
       } catch {
         setUser(null);
       } finally {
@@ -27,14 +39,16 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (formData) => {
     const res = await api.post("/auth/register", formData);
-    setUser(res.data.user);
-    toast.success(`Welcome to GigFlow, ${res.data.user.name}! 🎉`);
+    const u = normalizeUser(res.data.user);
+    setUser(u);
+    toast.success(`Welcome to GigFlow, ${u.name}! 🎉`);
   };
 
   const login = async (formData) => {
     const res = await api.post("/auth/login", formData);
-    setUser(res.data.user);
-    toast.success(`Welcome back, ${res.data.user.name}!`);
+    const u = normalizeUser(res.data.user);
+    setUser(u);
+    toast.success(`Welcome back, ${u.name}!`);
   };
 
   const logout = async () => {
@@ -44,7 +58,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (updated) => {
-    setUser(prev => ({ ...prev, ...updated }));
+    setUser(prev => normalizeUser({ ...prev, ...updated }));
   };
 
   return (

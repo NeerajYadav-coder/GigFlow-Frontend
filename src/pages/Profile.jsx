@@ -1,12 +1,23 @@
 import { useState, useContext, useEffect } from "react";
-import api from "../api/axios";
+import api, { BACKEND_URL } from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { 
+  User, MapPin, Calendar, Edit3, Save, Lock, Briefcase, FileText, 
+  CheckCircle, Plus, X, Award, ChevronRight, Settings, Key, ExternalLink, Trash2
+} from "lucide-react";
 
 const SKILLS_SUGGESTIONS = [
     "React", "Node.js", "MongoDB", "Python", "JavaScript", "TypeScript",
     "UI/UX Design", "Figma", "Next.js", "Vue.js", "Flutter", "Swift",
     "AWS", "Docker", "GraphQL", "PostgreSQL", "Redis", "TensorFlow"
+];
+
+const CATEGORIES = [
+  "Web Development", "Mobile Development", "UI/UX Design",
+  "Graphic Design", "Content Writing", "Digital Marketing",
+  "Video & Animation", "Data Science & AI", "DevOps & Cloud",
+  "Cybersecurity", "Database", "Other"
 ];
 
 const Profile = () => {
@@ -21,10 +32,60 @@ const Profile = () => {
         bio: user?.bio || "",
         location: user?.location || "",
         skills: user?.skills || [],
+        preferredCategory: user?.preferredCategory || "Other",
+        preferredMinBudget: user?.preferredMinBudget || 0,
     });
     const [skillInput, setSkillInput] = useState("");
     const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirm: "" });
     const [pwLoading, setPwLoading] = useState(false);
+    const [uploadingResume, setUploadingResume] = useState(false);
+    const [dragOver, setDragOver] = useState(false);
+
+    const uploadResumeFile = async (file) => {
+        if (!file) return;
+        const allowedExtensions = [".pdf", ".doc", ".docx"];
+        const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+        if (!allowedExtensions.includes(ext)) {
+            toast.warning("Only PDF, DOC, and DOCX files are allowed!");
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.warning("File size exceeds 5MB limit");
+            return;
+        }
+
+        setUploadingResume(true);
+        const formData = new FormData();
+        formData.append("resume", file);
+
+        try {
+            const res = await api.post("/profile/me/resume", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            });
+            updateUser(res.data.user);
+            toast.success("Resume uploaded successfully!");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to upload resume");
+        } finally {
+            setUploadingResume(false);
+        }
+    };
+
+    const deleteResumeFile = async () => {
+        if (!window.confirm("Are you sure you want to remove your resume?")) return;
+        setUploadingResume(true);
+        try {
+            const res = await api.delete("/profile/me/resume");
+            updateUser(res.data.user);
+            toast.success("Resume removed successfully");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to remove resume");
+        } finally {
+            setUploadingResume(false);
+        }
+    };
 
     useEffect(() => {
         if (user) {
@@ -33,11 +94,12 @@ const Profile = () => {
                 bio: user.bio || "",
                 location: user.location || "",
                 skills: user.skills || [],
+                preferredCategory: user.preferredCategory || "Other",
+                preferredMinBudget: user.preferredMinBudget || 0,
             });
         }
     }, [user]);
 
-    // Use user directly for stats as they are already included in AuthContext
     const stats = user;
 
     const saveProfile = async () => {
@@ -96,17 +158,19 @@ const Profile = () => {
     const avatarLetter = user.name?.charAt(0)?.toUpperCase() || "?";
 
     return (
-        <div className="min-h-screen pb-16" style={{ background: "var(--bg-primary)" }}>
+        <div className="min-h-screen pb-16" style={{ background: "var(--bg-secondary)" }}>
             <div className="section-container py-8">
                 <div className="max-w-3xl mx-auto">
 
-                    {/* Profile header */}
-                    <div className="card-dark p-6 sm:p-8 mb-6">
-                        <div className="flex flex-col sm:flex-row items-start gap-6">
+                    {/* Profile Header */}
+                    <div className="card-dark p-6 sm:p-8 mb-6 relative bg-white border-slate-200 shadow-sm">
+                        <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-600 to-sky-500" />
+                        
+                        <div className="flex flex-col sm:flex-row items-start gap-6 relative z-10">
                             {/* Avatar */}
                             <div
-                                className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black text-white shrink-0"
-                                style={{ background: "linear-gradient(135deg, #7c3aed, #c084fc)" }}
+                                className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-extrabold text-white shrink-0 shadow-md"
+                                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-secondary))" }}
                             >
                                 {avatarLetter}
                             </div>
@@ -114,30 +178,38 @@ const Profile = () => {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-4 mb-2">
                                     <div>
-                                        <h1 className="text-2xl font-bold text-[#f0f0fa]">{user.name}</h1>
-                                        <p className="text-sm" style={{ color: "var(--text-muted)" }}>{user.email}</p>
+                                        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">{user.name}</h1>
+                                        <p className="text-xs font-semibold mt-1 text-slate-400">{user.email}</p>
                                     </div>
-                                    <span className="badge badge-purple capitalize shrink-0">{user.role}</span>
+                                    <span className="badge badge-purple text-[10px] uppercase tracking-wider capitalize shrink-0">{user.role}</span>
                                 </div>
 
                                 {user.bio && (
-                                    <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                                    <p className="text-xs mt-3 leading-relaxed text-slate-550">
                                         {user.bio}
                                     </p>
                                 )}
 
-                                {user.location && (
-                                    <div className="flex items-center gap-1.5 mt-2 text-xs" style={{ color: "var(--text-muted)" }}>
-                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        {user.location}
-                                    </div>
-                                )}
+                                <div className="flex flex-wrap gap-4 mt-3 items-center">
+                                    {user.location && (
+                                        <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-400">
+                                            <MapPin className="w-3.5 h-3.5" />
+                                            {user.location}
+                                        </div>
+                                    )}
+                                    {user.resume && (
+                                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-650 bg-indigo-50/50 px-2.5 py-1 rounded-lg border border-indigo-100">
+                                            <FileText className="w-3.5 h-3.5 text-indigo-500" />
+                                            <a href={`${BACKEND_URL}${user.resume}`} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                                                {user.resumeOriginalName || "Resume"}
+                                                <ExternalLink className="w-3.5 h-3.5 text-indigo-400" />
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
 
                                 {user.skills?.length > 0 && (
-                                    <div className="flex flex-wrap gap-1.5 mt-3">
+                                    <div className="flex flex-wrap gap-1.5 mt-4">
                                         {user.skills.map(skill => (
                                             <span key={skill} className="skill-tag">{skill}</span>
                                         ))}
@@ -147,41 +219,43 @@ const Profile = () => {
                         </div>
                     </div>
 
-                    {/* Stats bar (if available) */}
+                    {/* Stats bar */}
                     {stats && (
-                        <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div className="grid grid-cols-3 gap-4 mb-8">
                             {user.role === "client" ? (
                                 <>
-                                    <StatMini label="Gigs Posted" value={stats.totalGigsPosted || 0} icon="📋" color="text-violet-400" />
-                                    <StatMini label="Freelancers Hired" value={stats.totalHires || 0} icon="✅" color="text-emerald-400" />
-                                    <StatMini label="Member Since" value={new Date(stats.createdAt).getFullYear()} icon="📅" color="text-amber-400" />
+                                    <StatMini label="Gigs Posted" value={stats.totalGigsPosted || 0} icon={<FileText className="w-4 h-4 text-indigo-600" />} color="text-indigo-650" />
+                                    <StatMini label="Hires Made" value={stats.totalHires || 0} icon={<CheckCircle className="w-4 h-4 text-emerald-650" />} color="text-emerald-600" />
+                                    <StatMini label="Joined Year" value={new Date(stats.createdAt).getFullYear()} icon={<Calendar className="w-4 h-4 text-amber-600" />} color="text-amber-600" />
                                 </>
                             ) : (
                                 <>
-                                    <StatMini label="Bids Placed" value={stats.totalBidsPlaced || 0} icon="📊" color="text-violet-400" />
-                                    <StatMini label="Jobs Completed" value={stats.totalHires || 0} icon="✅" color="text-emerald-400" />
-                                    <StatMini label="Member Since" value={new Date(stats.createdAt).getFullYear()} icon="📅" color="text-amber-400" />
+                                    <StatMini label="Bids Placed" value={stats.totalBidsPlaced || 0} icon={<Award className="w-4 h-4 text-indigo-600" />} color="text-indigo-650" />
+                                    <StatMini label="Gigs Completed" value={stats.totalHires || 0} icon={<CheckCircle className="w-4 h-4 text-emerald-650" />} color="text-emerald-600" />
+                                    <StatMini label="Joined Year" value={new Date(stats.createdAt).getFullYear()} icon={<Calendar className="w-4 h-4 text-amber-600" />} color="text-amber-600" />
                                 </>
                             )}
                         </div>
                     )}
 
                     {/* Tabs */}
-                    <div className="flex gap-1 mb-6 rounded-xl p-1 border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}>
+                    <div className="flex gap-1.5 mb-6 rounded-2xl p-1.5 border bg-white border-slate-200 shadow-sm">
                         {[
-                            { val: "profile", label: "Edit Profile" },
-                            { val: "password", label: "Change Password" },
+                            { val: "profile", label: "Edit Profile", icon: <Settings className="w-4 h-4" /> },
+                            ...(user.role === "freelancer" ? [{ val: "resume", label: "My Resume", icon: <FileText className="w-4 h-4" /> }] : []),
+                            { val: "password", label: "Security & Password", icon: <Key className="w-4 h-4" /> },
                         ].map(t => (
                             <button
                                 key={t.val}
                                 onClick={() => setTab(t.val)}
-                                className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${tab === t.val ? "text-white" : "text-[#8888aa] hover:text-[#f0f0fa]"
+                                className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${tab === t.val ? "text-white shadow-sm" : "text-slate-500 hover:text-indigo-600"
                                     }`}
                                 style={tab === t.val
-                                    ? { background: "linear-gradient(135deg, #7c3aed, #6d28d9)" }
+                                    ? { background: "linear-gradient(135deg, var(--accent), var(--accent-secondary))" }
                                     : {}
                                 }
                             >
+                                {t.icon}
                                 {t.label}
                             </button>
                         ))}
@@ -189,7 +263,7 @@ const Profile = () => {
 
                     {/* Profile Tab */}
                     {tab === "profile" && (
-                        <div className="card-dark p-6 sm:p-8">
+                        <div className="card-dark p-6 sm:p-10 relative bg-white border-slate-200 shadow-sm">
                             <div className="space-y-6">
 
                                 <div>
@@ -198,70 +272,101 @@ const Profile = () => {
                                         type="text"
                                         value={form.name}
                                         onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                                        className="input-dark"
+                                        className="input-dark bg-white"
                                         disabled={!editing}
-                                        style={!editing ? { opacity: 0.7, cursor: "not-allowed" } : {}}
+                                        style={!editing ? { opacity: 0.6, cursor: "not-allowed" } : {}}
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="form-label">Bio</label>
+                                    <label className="form-label">Bio Description</label>
                                     <textarea
                                         rows={4}
                                         value={form.bio}
                                         onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
-                                        placeholder={editing ? "Tell clients about yourself, your experience, and what you do best..." : "No bio added yet"}
-                                        className="input-dark resize-none"
+                                        placeholder={editing ? "Tell clients about your professional experience, key skills, and project approach..." : "No profile description provided"}
+                                        className="input-dark resize-none leading-relaxed bg-white"
                                         disabled={!editing}
                                         maxLength={500}
-                                        style={!editing ? { opacity: 0.7, cursor: "not-allowed" } : {}}
+                                        style={!editing ? { opacity: 0.6, cursor: "not-allowed" } : {}}
                                     />
                                     {editing && (
-                                        <p className="text-xs mt-1 text-right" style={{ color: "var(--text-muted)" }}>
-                                            {form.bio.length}/500
+                                        <p className="text-[10px] font-bold mt-1 text-right text-slate-400">
+                                            {form.bio.length} / 500 characters
                                         </p>
                                     )}
                                 </div>
 
                                 <div>
-                                    <label className="form-label">Location</label>
+                                    <label className="form-label">City, Country</label>
                                     <input
                                         type="text"
                                         value={form.location}
                                         onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
-                                        placeholder={editing ? "e.g. Mumbai, India" : "No location added"}
-                                        className="input-dark"
+                                        placeholder={editing ? "e.g. Mumbai, India" : "No location listed"}
+                                        className="input-dark bg-white"
                                         disabled={!editing}
-                                        style={!editing ? { opacity: 0.7, cursor: "not-allowed" } : {}}
+                                        style={!editing ? { opacity: 0.6, cursor: "not-allowed" } : {}}
                                     />
                                 </div>
 
+                                {user.role === "freelancer" && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                        <div>
+                                            <label className="form-label">Preferred Gig Category</label>
+                                            <select
+                                                value={form.preferredCategory}
+                                                onChange={e => setForm(f => ({ ...f, preferredCategory: e.target.value }))}
+                                                className="input-dark bg-white"
+                                                disabled={!editing}
+                                                style={!editing ? { opacity: 0.6, cursor: "not-allowed" } : { cursor: "pointer" }}
+                                            >
+                                                {CATEGORIES.map(cat => (
+                                                    <option key={cat} value={cat}>{cat}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="form-label">Minimum Target Budget (₹)</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={form.preferredMinBudget}
+                                                onChange={e => setForm(f => ({ ...f, preferredMinBudget: Number(e.target.value) || 0 }))}
+                                                className="input-dark bg-white"
+                                                disabled={!editing}
+                                                style={!editing ? { opacity: 0.6, cursor: "not-allowed" } : {}}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Skills */}
                                 <div>
-                                    <label className="form-label">Skills</label>
+                                    <label className="form-label">Skills & Expertise</label>
 
                                     {/* Current skills */}
-                                    <div className="flex flex-wrap gap-2 mb-3 min-h-[2rem]">
+                                    <div className="flex flex-wrap gap-2 mb-4 min-h-[1.5rem]">
                                         {form.skills.length === 0 && !editing && (
-                                            <p className="text-sm" style={{ color: "var(--text-muted)" }}>No skills added yet</p>
+                                            <p className="text-xs font-semibold text-slate-400">No skills added yet</p>
                                         )}
                                         {form.skills.map(skill => (
                                             <span
                                                 key={skill}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border"
                                                 style={{
-                                                    background: "rgba(139,92,246,0.12)",
-                                                    color: "#a78bfa",
-                                                    border: "1px solid rgba(139,92,246,0.25)"
+                                                    background: "rgba(79, 70, 229, 0.05)",
+                                                    color: "#4f46e5",
+                                                    borderColor: "rgba(79, 70, 229, 0.15)"
                                                 }}
                                             >
                                                 {skill}
                                                 {editing && (
                                                     <button
                                                         onClick={() => removeSkill(skill)}
-                                                        className="text-violet-400 hover:text-red-400 transition-colors"
+                                                        className="text-indigo-600 hover:text-rose-500 transition-colors cursor-pointer text-sm font-bold ml-0.5"
                                                     >
-                                                        ×
+                                                        <X className="w-3 h-3 inline" />
                                                     </button>
                                                 )}
                                             </span>
@@ -279,12 +384,12 @@ const Profile = () => {
                                                     onKeyDown={e => {
                                                         if (e.key === "Enter") { e.preventDefault(); addSkill(skillInput); }
                                                     }}
-                                                    placeholder="Type a skill and press Enter"
-                                                    className="input-dark flex-1"
+                                                    placeholder="Type key skill (e.g. Next.js) and press Enter"
+                                                    className="input-dark flex-1 bg-white"
                                                 />
                                                 <button
                                                     onClick={() => addSkill(skillInput)}
-                                                    className="btn-primary px-4 py-2.5"
+                                                    className="btn-primary px-5"
                                                     type="button"
                                                 >
                                                     Add
@@ -292,22 +397,17 @@ const Profile = () => {
                                             </div>
 
                                             {/* Quick suggestions */}
-                                            <div className="mt-3">
-                                                <p className="text-xs mb-2" style={{ color: "var(--text-muted)" }}>Quick add:</p>
+                                            <div className="mt-4">
+                                                <p className="text-[10px] font-bold uppercase tracking-wider mb-2.5 text-slate-400">Suggested Skills</p>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {SKILLS_SUGGESTIONS
                                                         .filter(s => !form.skills.includes(s))
-                                                        .slice(0, 10)
+                                                        .slice(0, 8)
                                                         .map(s => (
                                                             <button
                                                                 key={s}
                                                                 onClick={() => addSkill(s)}
-                                                                className="px-2.5 py-1 rounded-full text-xs transition-all border hover:border-violet-500/40"
-                                                                style={{
-                                                                    background: "var(--bg-secondary)",
-                                                                    borderColor: "var(--border)",
-                                                                    color: "var(--text-secondary)"
-                                                                }}
+                                                                className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all border border-slate-200 bg-white text-slate-655 hover:text-indigo-600 hover:border-indigo-100 cursor-pointer shadow-sm"
                                                                 type="button"
                                                             >
                                                                 + {s}
@@ -320,26 +420,35 @@ const Profile = () => {
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex gap-3 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+                                <div className="flex gap-3 pt-6 border-t border-slate-100" style={{ borderColor: "var(--border)" }}>
                                     {!editing ? (
-                                        <button onClick={() => setEditing(true)} className="btn-primary py-2.5">
-                                            ✏️ Edit Profile
+                                        <button onClick={() => setEditing(true)} className="btn-primary py-2.5 flex items-center gap-1.5">
+                                            <Edit3 className="w-4 h-4" /> Edit Profile Details
                                         </button>
                                     ) : (
                                         <>
                                             <button
                                                 onClick={saveProfile}
                                                 disabled={loading}
-                                                className="btn-primary py-2.5 disabled:opacity-60"
+                                                className="btn-primary py-2.5 disabled:opacity-60 flex items-center gap-1.5"
                                             >
                                                 {loading ? (
-                                                    <span className="flex items-center gap-2"><div className="spinner w-4 h-4" /> Saving...</span>
-                                                ) : "💾 Save Changes"}
+                                                    <><div className="spinner w-4 h-4" /> Saving...</>
+                                                ) : (
+                                                    <><Save className="w-4 h-4" /> Save Profile</>
+                                                )}
                                             </button>
                                             <button
                                                 onClick={() => {
                                                     setEditing(false);
-                                                    setForm({ name: user.name, bio: user.bio || "", location: user.location || "", skills: user.skills || [] });
+                                                    setForm({ 
+                                                        name: user.name, 
+                                                        bio: user.bio || "", 
+                                                        location: user.location || "", 
+                                                        skills: user.skills || [],
+                                                        preferredCategory: user.preferredCategory || "Other",
+                                                        preferredMinBudget: user.preferredMinBudget || 0
+                                                    });
                                                 }}
                                                 className="btn-secondary py-2.5"
                                             >
@@ -352,9 +461,105 @@ const Profile = () => {
                         </div>
                     )}
 
+                    {/* Resume Tab (Freelancers Only) */}
+                    {tab === "resume" && user.role === "freelancer" && (
+                        <div className="card-dark p-6 sm:p-10 relative bg-white border-slate-200 shadow-sm">
+                            <div className="space-y-6">
+                                <div>
+                                    <h2 className="text-lg font-bold text-slate-800 tracking-tight text-left">Professional Resume</h2>
+                                    <p className="text-xs text-slate-400 mt-1 font-semibold text-left">
+                                        Upload your professional resume (PDF, DOC, or DOCX up to 5MB) so clients can review it when you place bids.
+                                    </p>
+                                </div>
+
+                                {user.resume ? (
+                                    /* Resume Uploaded View */
+                                    <div className="rounded-2xl border border-indigo-100 bg-indigo-50/10 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                        <div className="flex items-center gap-4 text-left">
+                                            <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                                                <FileText className="w-6 h-6" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h3 className="font-extrabold text-slate-800 text-sm truncate">{user.resumeOriginalName || "resume.pdf"}</h3>
+                                                <p className="text-[10px] text-slate-400 font-semibold mt-1">Uploaded and linked to your profile</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 w-full sm:w-auto justify-end">
+                                            <a
+                                                href={`${BACKEND_URL}${user.resume}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn-secondary py-2 px-4 text-xs flex items-center gap-1.5 hover:text-indigo-600 font-bold"
+                                            >
+                                                <ExternalLink className="w-3.5 h-3.5" /> View Resume
+                                            </a>
+                                            <button
+                                                onClick={deleteResumeFile}
+                                                disabled={uploadingResume}
+                                                className="btn-danger py-2 px-4 text-xs flex items-center gap-1.5 font-bold"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" /> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    /* File Upload Form / Dropzone */
+                                    <div
+                                        onDragOver={(e) => {
+                                            e.preventDefault();
+                                            setDragOver(true);
+                                        }}
+                                        onDragLeave={() => setDragOver(false)}
+                                        onDrop={(e) => {
+                                            e.preventDefault();
+                                            setDragOver(false);
+                                            const file = e.dataTransfer.files[0];
+                                            if (file) {
+                                                uploadResumeFile(file);
+                                            }
+                                        }}
+                                        className={`border-2 border-dashed rounded-3xl p-10 text-center transition-all cursor-pointer ${
+                                            dragOver ? "border-indigo-500 bg-indigo-50/10 scale-[0.99]" : "border-slate-200 hover:border-indigo-400 bg-slate-50/20"
+                                        }`}
+                                        onClick={() => document.getElementById("resume-file-input").click()}
+                                    >
+                                        <input
+                                            id="resume-file-input"
+                                            type="file"
+                                            accept=".pdf,.doc,.docx"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                    uploadResumeFile(file);
+                                                }
+                                            }}
+                                        />
+                                        <div className="w-12 h-12 rounded-full mx-auto mb-4 bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400">
+                                            <FileText className="w-6 h-6 text-slate-500" />
+                                        </div>
+                                        <p className="text-xs font-bold text-slate-750">
+                                            {uploadingResume ? "Uploading your file..." : "Drag & drop your resume file here or click to browse"}
+                                        </p>
+                                        <p className="text-[10px] text-slate-400 font-semibold mt-2.5">
+                                            Supports PDF, DOC, DOCX formats (Max. 5MB)
+                                        </p>
+
+                                        {uploadingResume && (
+                                            <div className="mt-4 flex items-center justify-center gap-2">
+                                                <div className="spinner w-4 h-4" />
+                                                <span className="text-[10px] text-indigo-650 font-bold uppercase tracking-wider">Uploading to server...</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Password Tab */}
                     {tab === "password" && (
-                        <div className="card-dark p-6 sm:p-8">
+                        <div className="card-dark p-6 sm:p-10 relative bg-white border-slate-200 shadow-sm">
                             <form onSubmit={changePassword} className="space-y-6">
                                 <div>
                                     <label className="form-label">Current Password</label>
@@ -363,12 +568,12 @@ const Profile = () => {
                                         required
                                         value={pwForm.currentPassword}
                                         onChange={e => setPwForm(f => ({ ...f, currentPassword: e.target.value }))}
-                                        placeholder="Enter current password"
-                                        className="input-dark"
+                                        placeholder="Enter account password"
+                                        className="input-dark bg-white"
                                     />
                                 </div>
                                 <div>
-                                    <label className="form-label">New Password</label>
+                                    <label className="form-label">New Secure Password</label>
                                     <input
                                         type="password"
                                         required
@@ -376,7 +581,7 @@ const Profile = () => {
                                         value={pwForm.newPassword}
                                         onChange={e => setPwForm(f => ({ ...f, newPassword: e.target.value }))}
                                         placeholder="Min. 6 characters"
-                                        className="input-dark"
+                                        className="input-dark bg-white"
                                     />
                                 </div>
                                 <div>
@@ -386,22 +591,24 @@ const Profile = () => {
                                         required
                                         value={pwForm.confirm}
                                         onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))}
-                                        placeholder="Re-enter new password"
-                                        className="input-dark"
+                                        placeholder="Re-enter secure password"
+                                        className="input-dark bg-white"
                                     />
                                     {pwForm.confirm && pwForm.newPassword !== pwForm.confirm && (
-                                        <p className="text-xs mt-1.5 text-red-400">Passwords don't match</p>
+                                        <p className="text-xs mt-2 text-rose-500 font-semibold">Passwords do not match</p>
                                     )}
                                 </div>
-                                <div className="pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+                                <div className="pt-6 border-t border-slate-100" style={{ borderColor: "var(--border)" }}>
                                     <button
                                         type="submit"
                                         disabled={pwLoading}
-                                        className="btn-primary py-2.5 disabled:opacity-60"
+                                        className="btn-primary py-3 px-6 disabled:opacity-60 flex items-center gap-1.5"
                                     >
                                         {pwLoading ? (
-                                            <span className="flex items-center gap-2"><div className="spinner w-4 h-4" /> Updating...</span>
-                                        ) : "🔒 Update Password"}
+                                            <><div className="spinner w-4 h-4" /> Saving Password...</>
+                                        ) : (
+                                            <><Lock className="w-4 h-4" /> Update Password</>
+                                        )}
                                     </button>
                                 </div>
                             </form>
@@ -415,10 +622,12 @@ const Profile = () => {
 
 function StatMini({ label, value, icon, color }) {
     return (
-        <div className="stat-card text-center">
-            <div className="text-2xl mb-1">{icon}</div>
-            <div className={`text-2xl font-black ${color}`}>{value}</div>
-            <div className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>{label}</div>
+        <div className="stat-card text-center flex flex-col items-center bg-white shadow-sm border-slate-200">
+            <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center mb-2 shadow-inner">
+                {icon}
+            </div>
+            <div className={`text-xl font-black ${color}`}>{value}</div>
+            <div className="text-[10px] font-bold uppercase tracking-wider mt-1 text-slate-400">{label}</div>
         </div>
     );
 }
