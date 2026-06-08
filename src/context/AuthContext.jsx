@@ -37,18 +37,48 @@ export const AuthProvider = ({ children }) => {
     fetchUser();
   }, []);
 
+  /**
+   * Register — creates user and logs them in directly.
+   */
   const register = async (formData) => {
     const res = await api.post("/auth/register", formData);
     const u = normalizeUser(res.data.user);
     setUser(u);
     toast.success(`Welcome to GigFlow, ${u.name}! 🎉`);
+    return res.data;
   };
 
+  /**
+   * Login — standard email/password login.
+   */
   const login = async (formData) => {
     const res = await api.post("/auth/login", formData);
     const u = normalizeUser(res.data.user);
     setUser(u);
     toast.success(`Welcome back, ${u.name}!`);
+    return res.data;
+  };
+
+  /**
+   * Google Auth — send Google credential to backend.
+   */
+  const googleLogin = async (credential, role) => {
+    const res = await api.post("/auth/google", { credential, role });
+    
+    if (res.data.needsRole) {
+      return res.data;
+    }
+
+    const u = normalizeUser(res.data.user);
+    setUser(u);
+
+    if (res.data.isNewUser) {
+      toast.success(`Welcome to GigFlow, ${u.name}! 🎉`);
+    } else {
+      toast.success(`Welcome back, ${u.name}!`);
+    }
+
+    return res.data;
   };
 
   const logout = async () => {
@@ -62,7 +92,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, logout, updateUser }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      register,
+      login,
+      googleLogin,
+      logout,
+      updateUser
+    }}>
       {!loading && children}
     </AuthContext.Provider>
   );

@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { Mail, Lock, Eye, EyeOff, Briefcase, ArrowLeft, ArrowRight } from "lucide-react";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -29,11 +30,13 @@ const Login = () => {
       await login(form);
       navigate(from, { replace: true });
     } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed. Check your credentials.");
+      const msg = err.response?.data?.message || "Login failed. Check your credentials.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden" style={{ background: "var(--bg-secondary)" }}>
@@ -62,13 +65,27 @@ const Login = () => {
         {/* Form Box */}
         <div className="rounded-3xl border p-6 sm:p-10 shadow-xl relative bg-white"
           style={{ borderColor: "var(--border)" }}>
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-650 to-sky-500" />
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-600 to-sky-500" />
           
           <div className="mb-8">
             <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Welcome Back</h2>
             <p className="mt-2 text-xs font-semibold text-slate-500">
               Sign in to manage your gigs or submit bids.
             </p>
+          </div>
+
+          {/* Google Sign-In Button */}
+          <GoogleSignInButton
+            context="signin"
+            onSuccess={() => navigate(from, { replace: true })}
+          />
+
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t" style={{ borderColor: "var(--border)" }} /></div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-4 font-semibold text-slate-400">or sign in with email</span>
+            </div>
           </div>
 
           <form className="space-y-6" onSubmit={submit}>
