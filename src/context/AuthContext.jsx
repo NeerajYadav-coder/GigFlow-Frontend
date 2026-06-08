@@ -59,27 +59,6 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
-  /**
-   * Google Auth — send Google credential to backend.
-   */
-  const googleLogin = async (credential, role) => {
-    const res = await api.post("/auth/google", { credential, role });
-    
-    if (res.data.needsRole) {
-      return res.data;
-    }
-
-    const u = normalizeUser(res.data.user);
-    setUser(u);
-
-    if (res.data.isNewUser) {
-      toast.success(`Welcome to GigFlow, ${u.name}! 🎉`);
-    } else {
-      toast.success(`Welcome back, ${u.name}!`);
-    }
-
-    return res.data;
-  };
 
   const logout = async () => {
     await api.post("/auth/logout");
@@ -97,7 +76,6 @@ export const AuthProvider = ({ children }) => {
       loading,
       register,
       login,
-      googleLogin,
       logout,
       updateUser
     }}>

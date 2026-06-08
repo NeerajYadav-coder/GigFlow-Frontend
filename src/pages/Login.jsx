@@ -3,7 +3,6 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { Mail, Lock, Eye, EyeOff, Briefcase, ArrowLeft, ArrowRight } from "lucide-react";
-import GoogleSignInButton from "../components/GoogleSignInButton";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -19,9 +18,9 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/", { replace: true });
+      navigate(from, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, from]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -74,19 +73,7 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Google Sign-In Button */}
-          <GoogleSignInButton
-            context="signin"
-            onSuccess={() => navigate(from, { replace: true })}
-          />
 
-          {/* Divider */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t" style={{ borderColor: "var(--border)" }} /></div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-4 font-semibold text-slate-400">or sign in with email</span>
-            </div>
-          </div>
 
           <form className="space-y-6" onSubmit={submit}>
             {/* Email */}

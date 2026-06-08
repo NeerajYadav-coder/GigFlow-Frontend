@@ -2,7 +2,6 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
-import GoogleSignInButton from "../components/GoogleSignInButton";
 import { User, Mail, Lock, Eye, EyeOff, Briefcase, Code, ArrowLeft, ArrowRight } from "lucide-react";
 
 const Register = () => {
@@ -101,21 +100,7 @@ const Register = () => {
             <p className="mt-2 text-xs font-semibold text-slate-500">Join GigFlow and discover professional work opportunities.</p>
           </div>
 
-          <GoogleSignInButton
-            role={form.role || null}
-            context="signup"
-            onSuccess={() => navigate(from, { replace: true })}
-          />
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t" style={{ borderColor: "var(--border)" }} />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-4 font-semibold text-slate-400">or register with email</span>
-            </div>
-          </div>
 
           <form className="space-y-5" onSubmit={submitForm}>
             {/* Role selector */}
