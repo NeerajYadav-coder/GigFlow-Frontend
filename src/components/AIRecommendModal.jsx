@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, Sparkles, Trophy, Medal, AlertTriangle, Star, ChevronDown, ChevronUp, Zap, Check } from "lucide-react";
+import { BACKEND_URL } from "../api/axios";
 
 /* Renders a single score bar row */
 const ScoreBar = ({ label, score, max = 10 }) => {
@@ -189,7 +190,7 @@ const AIRecommendModal = ({ gigId, gigTitle, bids, onClose, onHire }) => {
     setResult(null);
     try {
       // Use fetch directly so we can easily handle streaming later
-      const res = await fetch(`/api/ai/recommend/${gigId}`, {
+      const res = await fetch(`${BACKEND_URL}/api/ai/recommend/${gigId}`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" }
